@@ -2,14 +2,41 @@
 
 require 'csv'
 require 'net/http'
+require 'optparse'
 
 STDOUT.sync = true
 
 pages = []
-uri = URI('http://openisbn.com')
 
-Net::HTTP.start(uri.host, uri.port) do |http|
-  CSV.foreach('biblio.csv', col_sep: ';', headers: true, converters: :all) do |row|
+options = {
+  filename: 'biblio.csv',
+  uri: URI('http://openisbn.com'),
+  isbn: nil
+}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: babelio_pages.rb [options]'
+
+  opts.on('-f', '--filename FILENAME', 'Set CSV filename (default: biblio.csv') do |filename|
+    options[:filename] = filename
+  end
+
+  opts.on('-u', '--uri URI', 'Set URI (default: http://openisbn.com') do |uri|
+    options[:uri] = URI(uri)
+  end
+
+  opts.on('-i', '--isbn ISBN', 'Display ISBN details (default: nil') do |isbn|
+    options[:isbn] = isbn.to_i
+  end
+end.parse!
+
+Net::HTTP.start(options[:uri].host, options[:uri].port) do |http|
+  if options[:isbn]
+    http.head("/isbn/#{options[:isbn]}")
+    puts http.get("/download/#{options[:isbn]}.txt").body
+    exit
+  end
+
+  CSV.foreach(options[:filename], col_sep: ';', headers: true, converters: :all) do |row|
 
     unless row['Statut'] == 'Lu'
       print '-'
