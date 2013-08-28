@@ -16,16 +16,21 @@ options = {
 OptionParser.new do |opts|
   opts.banner = 'Usage: babelio_pages.rb [options]'
 
-  opts.on('-f', '--filename FILENAME', 'Set CSV filename (default: biblio.csv') do |filename|
+  opts.on('-f', '--filename FILENAME', 'Set CSV filename (default: biblio.csv)') do |filename|
     options[:filename] = filename
   end
 
-  opts.on('-u', '--uri URI', 'Set URI (default: http://openisbn.com') do |uri|
+  opts.on('-u', '--uri URI', 'Set URI (default: http://openisbn.com)') do |uri|
     options[:uri] = URI(uri)
   end
 
-  opts.on('-i', '--isbn ISBN', 'Display ISBN details (default: nil') do |isbn|
+  opts.on('-i', '--isbn ISBN', 'Only display this ISBN details (default: none)') do |isbn|
     options[:isbn] = isbn.to_i
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
   end
 end.parse!
 
